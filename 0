@@ -607,7 +607,7 @@ function Playback:start()
 						currentAnim = "run"
 					end
 					-- Adjust animation speed based on movement speed
-					local speedMultiplier = math.clamp(horizontalSpeed / 24, 0.6, 1.2)
+					local speedMultiplier = math.clamp(horizontalSpeed / 22, 0.65, 1.3)
 					self.runAnim:AdjustSpeed(speedMultiplier)
 				else
 					if currentAnim ~= "idle" then
