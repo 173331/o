@@ -1,1 +1,79 @@
-s
+-- TEST PARSE RECORDINGS (NEW METHOD)
+-- Copy paste ke executor
+
+local STORAGE_FILE = "autowalk_recordings.txt"
+
+print("=== TEST NEW PARSE METHOD ===")
+
+-- Test 1: Cek file ada
+if not isfile(STORAGE_FILE) then
+    print("❌ File NOT found")
+    return
+end
+
+-- Test 2: Baca file
+local fileData = readfile(STORAGE_FILE)
+print("📄 File size: " .. #fileData .. " bytes")
+
+-- Test 3: Parse manual
+local recordings = {}
+local loaded = 0
+local pos = 1
+
+while pos <= #fileData do
+    -- Cari separator ##
+    local sepStart = fileData:find("##", pos, true)
+    if not sepStart then 
+        print("⚠️ No more ## found at pos " .. pos)
+        break 
+    end
+    
+    -- Ambil name
+    local name = fileData:sub(pos, sepStart - 1)
+    print("\n🔍 Found name: '" .. name .. "' at pos " .. pos)
+    
+    -- Cari recording berikutnya
+    local dataStart = sepStart + 2
+    local nextRecStart = nil
+    
+    for i = dataStart, #fileData - 2 do
+        if fileData:sub(i, i) == "\n" then
+            local testPos = i + 1
+            local testSep = fileData:find("##", testPos, true)
+            if testSep then
+                local testName = fileData:sub(testPos, testSep - 1)
+                if testName:match("^[%w_%-]+$") then
+                    print("  🔍 Found next recording at pos " .. i)
+                    nextRecStart = i
+                    break
+                end
+            end
+        end
+    end
+    
+    -- Ambil data
+    local dataEnd = nextRecStart and (nextRecStart - 1) or #fileData
+    local data = fileData:sub(dataStart, dataEnd)
+    
+    print("  📊 Data size: " .. #data .. " bytes")
+    print("  📄 First 50 chars: " .. data:sub(1, 50):gsub("\n", "\\n"))
+    
+    if name and data and #name > 0 and #data > 0 then
+        recordings[name] = data
+        loaded = loaded + 1
+        print("  ✅ Loaded successfully")
+    else
+        print("  ❌ Invalid data")
+    end
+    
+    -- Move ke recording berikutnya
+    pos = nextRecStart and (nextRecStart + 1) or (#fileData + 1)
+end
+
+print("\n📊 SUMMARY:")
+print("Total loaded: " .. loaded)
+for name in pairs(recordings) do
+    print("  - " .. name)
+end
+
+print("\n=== TEST COMPLETE ===")
